@@ -5,10 +5,21 @@ import Producto from "../models/Producto.js";
 // ===============================
 export const getProductos = async (req, res) => {
   try {
-    const productos = await Producto.find().sort({ createdAt: -1 }); // ordena del más nuevo al más viejo
-    res.json(productos);
+    // 🧠 .lean() devuelve objetos planos (no instancias de Mongoose)
+    const productos = await Producto.find().sort({ createdAt: -1 }).lean();
+
+    // 🔧 Convertimos _id en string y formateamos fechas
+    const productosLimpios = productos.map((p) => ({
+      ...p,
+      _id: p._id.toString(),
+      createdAt: p.createdAt ? new Date(p.createdAt).toISOString() : null,
+      updatedAt: p.updatedAt ? new Date(p.updatedAt).toISOString() : null,
+    }));
+
+    res.json(productosLimpios);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("❌ Error en getProductos:", err);
+    res.status(500).json({ error: "Error al obtener los productos" });
   }
 };
 
@@ -23,6 +34,7 @@ export const crearProducto = async (req, res) => {
     if (!nombre || !precio)
       return res.status(400).json({ error: "Nombre y precio son requeridos" });
 
+    // Crear nuevo producto
     const nuevo = new Producto({
       nombre,
       precio,
@@ -33,9 +45,16 @@ export const crearProducto = async (req, res) => {
 
     const guardado = await nuevo.save();
 
-    res.status(201).json(guardado); // ✅ devolvemos el producto creado
+    // 🔧 Enviamos el producto limpio al frontend
+    res.status(201).json({
+      ...guardado.toObject(),
+      _id: guardado._id.toString(),
+      createdAt: guardado.createdAt?.toISOString(),
+      updatedAt: guardado.updatedAt?.toISOString(),
+    });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.error("❌ Error en crearProducto:", err);
+    res.status(400).json({ error: "Error al crear el producto" });
   }
 };
 
@@ -47,15 +66,21 @@ export const actualizarProducto = async (req, res) => {
     const actualizado = await Producto.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true } // ✅ devuelve el producto actualizado
-    );
+      { new: true } // Devuelve el producto ya actualizado
+    ).lean();
 
     if (!actualizado)
       return res.status(404).json({ error: "Producto no encontrado" });
 
-    res.json(actualizado);
+    res.json({
+      ...actualizado,
+      _id: actualizado._id.toString(),
+      createdAt: actualizado.createdAt?.toISOString(),
+      updatedAt: actualizado.updatedAt?.toISOString(),
+    });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.error("❌ Error en actualizarProducto:", err);
+    res.status(400).json({ error: "Error al actualizar el producto" });
   }
 };
 
@@ -64,13 +89,20 @@ export const actualizarProducto = async (req, res) => {
 // ===============================
 export const eliminarProducto = async (req, res) => {
   try {
-    const eliminado = await Producto.findByIdAndDelete(req.params.id);
+    const eliminado = await Producto.findByIdAndDelete(req.params.id).lean();
 
     if (!eliminado)
       return res.status(404).json({ error: "Producto no encontrado" });
 
-    res.json({ mensaje: "Producto eliminado", eliminado });
+    res.json({
+      mensaje: "Producto eliminado correctamente",
+      eliminado: {
+        ...eliminado,
+        _id: eliminado._id.toString(),
+      },
+    });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.error("❌ Error en eliminarProducto:", err);
+    res.status(400).json({ error: "Error al eliminar el producto" });
   }
 };

@@ -1,5 +1,10 @@
 import { renderApp, renderError, renderLoading } from "./ui.js";
-import { getProductos, createProducto, updateProducto, deleteProducto } from "./api.js";
+import {
+  getProductos,
+  createProducto,
+  updateProducto,
+  deleteProducto,
+} from "./api.js";
 
 // ===============================
 // Estado global
@@ -20,7 +25,7 @@ async function init() {
     currentTab,
   });
 
-  // Carga los productos al inicio (aunque empiece en Registrar)
+  // Carga productos, aunque empiece en Registrar
   await loadAndRender();
 }
 
@@ -35,8 +40,18 @@ async function loadAndRender() {
   renderLoading(app);
 
   try {
-    const data = await getProductos(); // Obtiene los productos del backend
-    items = data;
+    const data = await getProductos();
+    items = data.map((item) => ({
+      ...item,
+      // ✅ Formatear ID y fecha
+      _id:
+        typeof item._id === "object"
+          ? item._id.$oid || JSON.stringify(item._id)
+          : item._id,
+      fecha: item.createdAt
+        ? new Date(item.createdAt).toLocaleDateString("es-ES")
+        : "Sin fecha",
+    }));
 
     renderApp(app, {
       items,
@@ -56,17 +71,17 @@ async function loadAndRender() {
 // ===============================
 async function handleCreate(data) {
   try {
-    // Validación simple
-    if (!data.name.trim() || isNaN(data.qty) || isNaN(data.price)) {
-      renderError(app, "Nombre, cantidad o precio inválidos.");
+    if (!data.name.trim() || isNaN(data.price)) {
+      renderError(app, "Nombre o precio inválidos.");
       return;
     }
 
-    // Crear producto en backend
+    // ✅ Crear producto con fecha actual
     const nuevo = await createProducto({
       nombre: data.name.trim(),
       precio: Number(data.price),
       categoria: data.category || "General",
+      fecha: new Date().toISOString(),
     });
 
     console.log("✅ Producto creado:", nuevo);
@@ -102,14 +117,6 @@ async function handleDelete(id) {
 // Editar producto (PUT)
 // ===============================
 async function handleEdit(item) {
-  const nuevo = await createProducto({
-  nombre: data.name.trim(),
-  cantidad: Number(data.qty),
-  precio: Number(data.price),
-  categoria: data.category || "General",
-  fecha: new Date().toISOString(), // 👈 guarda la fecha actual
-});
-
   const newName = prompt("Nuevo nombre:", item.nombre);
   if (newName === null) return;
 
