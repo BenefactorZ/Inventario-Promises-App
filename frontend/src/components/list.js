@@ -36,7 +36,18 @@ export function createTable(
   container.appendChild(filtersDiv);
 
   // ===== AÑOS DISPONIBLES =====
-  const years = [...new Set(items.map((i) => i.date.split("-")[2]))].sort();
+  const years = [
+    ...new Set(
+      items
+        .map((i) => {
+          if (!i.fecha) return null;
+          const parts = i.fecha.split("-");
+          return parts.length === 3 ? parts[2] : null;
+        })
+        .filter(Boolean)
+    ),
+  ].sort();
+
   const yearFilter = filtersDiv.querySelector("#yearFilter");
   yearFilter.innerHTML =
     `<option value="">Año</option>` +
@@ -47,31 +58,50 @@ export function createTable(
   table.className = "table table-hover align-middle table-theme";
 
   const renderRows = (data) => {
-    if (data.length === 0)
-      return `<tr><td colspan="7" class="text-center text-muted">Sin resultados</td></tr>`;
+  if (data.length === 0)
+    return `<tr><td colspan="7" class="text-center text-muted">Sin resultados</td></tr>`;
 
-    return data
-      .map(
-        (item) => `
-        <tr>
-          <td>${item._id}</td>
-          <td>${item.name}</td>
-          <td>${item.qty}</td>
-          <td>$${item.price.toFixed(2)}</td>
-          <td>${item.category}</td>
-          <td>${item.date}</td>
-          <td>
-            <button class="btn btn-sm btn-outline-purple edit" data-id="${item._id}">
-              <i class="bi bi-pencil"></i> Editar
-            </button>
-            <button class="btn btn-sm btn-outline-danger delete" data-id="${item._id}">
-              <i class="bi bi-trash"></i> Eliminar
-            </button>
-          </td>
-        </tr>`
-      )
-      .join("");
-  };
+  return data
+    .map((item) => {
+      // ✅ Corrige ID (si viene como objeto)
+      const id =
+        typeof item._id === "object"
+          ? item._id.$oid || JSON.stringify(item._id)
+          : item._id;
+
+      // ✅ Corrige fecha (si viene en formato ISO o no existe)
+      let fecha = "Sin fecha";
+      if (item.fecha) {
+        if (item.fecha.includes("T")) {
+          // Formato ISO → convertir a dd-mm-yyyy
+          const d = new Date(item.fecha);
+          fecha = d.toLocaleDateString("es-ES");
+        } else {
+          fecha = item.fecha;
+        }
+      }
+
+      return `
+      <tr>
+        <td>${id}</td>
+        <td>${item.nombre ?? "Sin nombre"}</td>
+        <td>${item.cantidad ?? 0}</td>
+        <td>$${Number(item.precio ?? 0).toFixed(2)}</td>
+        <td>${item.categoria ?? "Sin categoría"}</td>
+        <td>${fecha}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-purple edit" data-id="${id}">
+            <i class="bi bi-pencil"></i> Editar
+          </button>
+          <button class="btn btn-sm btn-outline-danger delete" data-id="${id}">
+            <i class="bi bi-trash"></i> Eliminar
+          </button>
+        </td>
+      </tr>`;
+    })
+    .join("");
+};
+
 
   const tbody = document.createElement("tbody");
   tbody.innerHTML = renderRows(items);
@@ -122,11 +152,15 @@ export function createTable(
 
     const filtered = items.filter((i) => {
       const matchesSearch =
-        i.name.toLowerCase().includes(search) || String(i._id).includes(search);
-      const [day, mo, yr] = i.date.split("-");
+        i.nombre?.toLowerCase().includes(search) || String(i._id).includes(search);
+
+      const parts = i.fecha ? i.fecha.split("-") : [];
+      const [day, mo, yr] = parts.length === 3 ? parts : [null, null, null];
+
       const matchesYear = !year || yr === year;
       const matchesMonth = !month || mo === String(month).padStart(2, "0");
-      const matchesCategory = !category || i.category === category;
+      const matchesCategory = !category || i.categoria === category;
+
       return matchesSearch && matchesYear && matchesMonth && matchesCategory;
     });
 
@@ -144,7 +178,7 @@ export function createTable(
 
     if (editBtn) {
       const id = editBtn.dataset.id;
-      const item = items.find((it) => it._id === Number(id));
+      const item = items.find((it) => it._id === id || it._id === Number(id));
       if (item) onEdit(item);
     }
 

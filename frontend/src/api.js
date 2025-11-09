@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:4000/api/productos";
+const API_URL = 'https://inventario-promises-app-1.onrender.com/api/productos';
 
 export async function getProductos() {
   const res = await fetch(API_URL);

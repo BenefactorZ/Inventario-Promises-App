@@ -5,14 +5,22 @@ import { getProductos, createProducto, updateProducto, deleteProducto } from "./
 // Estado global
 // ===============================
 let items = [];
-let currentTab = "list";
+let currentTab = "form"; // 👈 Inicia en el formulario
 const app = document.getElementById("app");
 
 // ===============================
 // Inicialización
 // ===============================
 async function init() {
-  currentTab = "list";
+  renderApp(app, {
+    items,
+    onCreate: handleCreate,
+    onDelete: handleDelete,
+    onEdit: handleEdit,
+    currentTab,
+  });
+
+  // Carga los productos al inicio (aunque empiece en Registrar)
   await loadAndRender();
 }
 
@@ -22,6 +30,8 @@ document.addEventListener("DOMContentLoaded", init);
 // Cargar productos desde MongoDB
 // ===============================
 async function loadAndRender() {
+  if (currentTab !== "list") return; // 👈 Solo carga si estamos en la pestaña de productos
+
   renderLoading(app);
 
   try {
@@ -61,8 +71,10 @@ async function handleCreate(data) {
 
     console.log("✅ Producto creado:", nuevo);
 
+    // Cambia a la pestaña de productos después de crear
     currentTab = "list";
     await loadAndRender();
+    setActiveTab("productos");
   } catch (err) {
     console.error("❌ Error al crear producto:", err);
     renderError(app, "No se pudo crear el producto.");
@@ -90,6 +102,14 @@ async function handleDelete(id) {
 // Editar producto (PUT)
 // ===============================
 async function handleEdit(item) {
+  const nuevo = await createProducto({
+  nombre: data.name.trim(),
+  cantidad: Number(data.qty),
+  precio: Number(data.price),
+  categoria: data.category || "General",
+  fecha: new Date().toISOString(), // 👈 guarda la fecha actual
+});
+
   const newName = prompt("Nuevo nombre:", item.nombre);
   if (newName === null) return;
 
@@ -113,5 +133,42 @@ async function handleEdit(item) {
   } catch (err) {
     console.error("❌ Error al actualizar producto:", err);
     renderError(app, "No se pudo actualizar el producto.");
+  }
+}
+
+// ===============================
+// Navegación entre pestañas
+// ===============================
+document.getElementById("btnRegistrar").addEventListener("click", () => {
+  currentTab = "form";
+  renderApp(app, {
+    items,
+    onCreate: handleCreate,
+    onDelete: handleDelete,
+    onEdit: handleEdit,
+    currentTab,
+  });
+  setActiveTab("registrar");
+});
+
+document.getElementById("btnProductos").addEventListener("click", async () => {
+  currentTab = "list";
+  await loadAndRender();
+  setActiveTab("productos");
+});
+
+// ===============================
+// Cambiar visualmente el tab activo
+// ===============================
+function setActiveTab(tab) {
+  const btnRegistrar = document.getElementById("btnRegistrar");
+  const btnProductos = document.getElementById("btnProductos");
+
+  if (tab === "registrar") {
+    btnRegistrar.classList.add("active");
+    btnProductos.classList.remove("active");
+  } else {
+    btnProductos.classList.add("active");
+    btnRegistrar.classList.remove("active");
   }
 }

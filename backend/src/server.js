@@ -9,26 +9,29 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Middleware
+// ====== Middleware ======
 app.use(cors());
 app.use(express.json());
 
-// Conexión a MongoDB
+// ====== Conexión a MongoDB ======
 mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ Conectado a MongoDB Atlas"))
-  .catch((err) => console.error("❌ Error al conectar con MongoDB:", err));
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("Conectado a MongoDB Atlas"))
+  .catch((err) => console.error(" Error al conectar con MongoDB:", err));
 
-// Rutas principales
-app.use("/api/productos", productosRoutes); // ✅ Aquí registras tu CRUD
-console.log("✅ Ruta /api/productos registrada correctamente");
+// ====== Rutas principales ======
+app.use("/api/productos", productosRoutes);
+console.log(" Ruta /api/productos registrada correctamente");
 
-// Ruta de prueba
+// ====== Ruta raíz (para prueba rápida) ======
 app.get("/", (req, res) => {
-  res.send("Servidor backend funcionando 🚀");
+  res.send(" Servidor backend funcionando correctamente");
 });
 
-// Servidor
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
+// ====== Servidor ======
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(` Servidor corriendo en el puerto ${PORT}`);
 });

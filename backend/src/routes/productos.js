@@ -4,7 +4,7 @@ import {
   crearProducto,
   actualizarProducto,
   eliminarProducto,
-} from "../controllers/productoController.js"; // ✅ bien referenciado
+} from "../controllers/productoController.js";
 
 const router = express.Router();
 
