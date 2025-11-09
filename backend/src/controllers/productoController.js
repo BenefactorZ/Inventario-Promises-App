@@ -1,25 +1,24 @@
 import Producto from "../models/Producto.js";
 
-// ===============================
-// Obtener todos los productos
-// ===============================
+
 export const getProductos = async (req, res) => {
   try {
-    // 🧠 .lean() devuelve objetos planos (no instancias de Mongoose)
-    const productos = await Producto.find().sort({ createdAt: -1 }).lean();
+    // Trae los productos, ordenados del más nuevo al más viejo
+    const productos = await Producto.find().sort({ createdAt: -1 });
 
-    // 🔧 Convertimos _id en string y formateamos fechas
+    // ✅ Convertimos los ObjectId a strings
     const productosLimpios = productos.map((p) => ({
-      ...p,
+      ...p.toObject(),
       _id: p._id.toString(),
-      createdAt: p.createdAt ? new Date(p.createdAt).toISOString() : null,
-      updatedAt: p.updatedAt ? new Date(p.updatedAt).toISOString() : null,
+      fecha: p.fecha
+        ? new Date(p.fecha).toISOString().split("T")[0] // YYYY-MM-DD
+        : "Sin fecha",
     }));
 
     res.json(productosLimpios);
   } catch (err) {
-    console.error("❌ Error en getProductos:", err);
-    res.status(500).json({ error: "Error al obtener los productos" });
+    console.error("❌ Error al obtener productos:", err);
+    res.status(500).json({ error: err.message });
   }
 };
 

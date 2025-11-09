@@ -41,12 +41,12 @@ export function createTable(
       items
         .map((i) => {
           if (!i.fecha) return null;
-          const parts = i.fecha.split("-");
-          return parts.length === 3 ? parts[2] : null;
+          const d = new Date(i.fecha);
+          return d.getFullYear();
         })
         .filter(Boolean)
     ),
-  ].sort();
+  ].sort((a, b) => b - a);
 
   const yearFilter = filtersDiv.querySelector("#yearFilter");
   yearFilter.innerHTML =
@@ -58,50 +58,47 @@ export function createTable(
   table.className = "table table-hover align-middle table-theme";
 
   const renderRows = (data) => {
-  if (data.length === 0)
-    return `<tr><td colspan="7" class="text-center text-muted">Sin resultados</td></tr>`;
+    if (data.length === 0)
+      return `<tr><td colspan="7" class="text-center text-muted">Sin resultados</td></tr>`;
 
-  return data
-    .map((item) => {
-      // ✅ Corrige ID (si viene como objeto)
-      const id =
-        typeof item._id === "object"
-          ? item._id.$oid || JSON.stringify(item._id)
-          : item._id;
+    return data
+      .map((item) => {
+        // ✅ ID limpio (sin $oid)
+        const id = String(item._id || "Sin ID");
 
-      // ✅ Corrige fecha (si viene en formato ISO o no existe)
-      let fecha = "Sin fecha";
-      if (item.fecha) {
-        if (item.fecha.includes("T")) {
-          // Formato ISO → convertir a dd-mm-yyyy
+        // ✅ Fecha formateada
+        let fecha = "Sin fecha";
+        if (item.fecha) {
           const d = new Date(item.fecha);
-          fecha = d.toLocaleDateString("es-ES");
-        } else {
-          fecha = item.fecha;
+          if (!isNaN(d)) {
+            fecha = d.toLocaleDateString("es-ES", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            });
+          }
         }
-      }
 
-      return `
-      <tr>
-        <td>${id}</td>
-        <td>${item.nombre ?? "Sin nombre"}</td>
-        <td>${item.cantidad ?? 0}</td>
-        <td>$${Number(item.precio ?? 0).toFixed(2)}</td>
-        <td>${item.categoria ?? "Sin categoría"}</td>
-        <td>${fecha}</td>
-        <td>
-          <button class="btn btn-sm btn-outline-purple edit" data-id="${id}">
-            <i class="bi bi-pencil"></i> Editar
-          </button>
-          <button class="btn btn-sm btn-outline-danger delete" data-id="${id}">
-            <i class="bi bi-trash"></i> Eliminar
-          </button>
-        </td>
-      </tr>`;
-    })
-    .join("");
-};
-
+        return `
+          <tr>
+            <td>${id}</td>
+            <td>${item.nombre ?? "Sin nombre"}</td>
+            <td>${item.cantidad ?? 0}</td>
+            <td>$${Number(item.precio ?? 0).toFixed(2)}</td>
+            <td>${item.categoria ?? "Sin categoría"}</td>
+            <td>${fecha}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-purple edit" data-id="${id}">
+                <i class="bi bi-pencil"></i> Editar
+              </button>
+              <button class="btn btn-sm btn-outline-danger delete" data-id="${id}">
+                <i class="bi bi-trash"></i> Eliminar
+              </button>
+            </td>
+          </tr>`;
+      })
+      .join("");
+  };
 
   const tbody = document.createElement("tbody");
   tbody.innerHTML = renderRows(items);
@@ -154,11 +151,9 @@ export function createTable(
       const matchesSearch =
         i.nombre?.toLowerCase().includes(search) || String(i._id).includes(search);
 
-      const parts = i.fecha ? i.fecha.split("-") : [];
-      const [day, mo, yr] = parts.length === 3 ? parts : [null, null, null];
-
-      const matchesYear = !year || yr === year;
-      const matchesMonth = !month || mo === String(month).padStart(2, "0");
+      const d = new Date(i.fecha);
+      const matchesYear = !year || d.getFullYear().toString() === year;
+      const matchesMonth = !month || d.getMonth() + 1 === Number(month);
       const matchesCategory = !category || i.categoria === category;
 
       return matchesSearch && matchesYear && matchesMonth && matchesCategory;
@@ -178,7 +173,7 @@ export function createTable(
 
     if (editBtn) {
       const id = editBtn.dataset.id;
-      const item = items.find((it) => it._id === id || it._id === Number(id));
+      const item = items.find((it) => String(it._id) === id);
       if (item) onEdit(item);
     }
 
