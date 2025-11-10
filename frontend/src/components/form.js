@@ -1,3 +1,4 @@
+// === CREAR PRODUCTO ===
 export function createForm(onSubmit) {
   const container = document.createElement("div");
   container.className = "card card-body shadow-sm";
@@ -10,7 +11,7 @@ export function createForm(onSubmit) {
         <div class="col-md-3">
           <label class="form-label fw-semibold">Nombre del Producto</label>
           <input 
-            name="name" 
+            name="nombre" 
             class="form-control input-theme" 
             required 
           />
@@ -19,7 +20,7 @@ export function createForm(onSubmit) {
         <div class="col-md-3">
           <label class="form-label fw-semibold">Cantidad</label>
           <input 
-            name="qty" 
+            name="cantidad" 
             type="number" 
             class="form-control input-theme" 
             min="0" 
@@ -30,7 +31,7 @@ export function createForm(onSubmit) {
         <div class="col-md-3">
           <label class="form-label fw-semibold">Precio ($)</label>
           <input 
-            name="price" 
+            name="precio" 
             type="number" 
             step="0.01" 
             class="form-control input-theme" 
@@ -41,7 +42,7 @@ export function createForm(onSubmit) {
 
         <div class="col-md-3">
           <label class="form-label fw-semibold">Categoría</label>
-          <select name="category" class="form-select input-theme" required>
+          <select name="categoria" class="form-select input-theme" required>
             <option value="" selected disabled>Seleccionar categoría</option>
             <option>Papelería</option>
             <option>Ropa y accesorios</option>
@@ -71,7 +72,7 @@ export function createForm(onSubmit) {
 
   const form = container.querySelector("#itemForm");
 
-  // === ACTUALIZAR ESTILO DE INPUTS SEGÚN TEMA ===
+  // === APLICAR TEMA CLARO/OSCURO ===
   const updateInputTheme = () => {
     const isLight = document.documentElement.getAttribute("data-theme") === "light";
     form.querySelectorAll(".input-theme").forEach((el) => {
@@ -86,37 +87,114 @@ export function createForm(onSubmit) {
       }
     });
   };
-
   updateInputTheme();
   const observer = new MutationObserver(updateInputTheme);
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ["data-theme"],
-  });
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-  // === EVENTO DE ENVÍO ===
+  // === ENVÍO DEL FORMULARIO ===
   form.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    // Fecha actual en formato dd-mm-yyyy
-    const now = new Date();
-    const date = `${String(now.getDate()).padStart(2, "0")}-${String(
-      now.getMonth() + 1
-    ).padStart(2, "0")}-${now.getFullYear()}`;
+    const fecha = new Date().toISOString();
 
     const data = {
-      name: form.name.value.trim(),
-      qty: Number(form.qty.value),
-      price: Number(form.price.value),
-      category: form.category.value.trim(),
-      date, // ✅ Se agrega aquí
+      nombre: form.nombre.value.trim(),
+      cantidad: Number(form.cantidad.value),
+      precio: Number(form.precio.value),
+      categoria: form.categoria.value.trim(),
+      fecha,
     };
 
-    if (!data.name || !data.category || isNaN(data.qty) || isNaN(data.price)) return;
+    if (!data.nombre || !data.categoria || isNaN(data.cantidad) || isNaN(data.precio)) return;
 
     onSubmit(data);
     form.reset();
   });
 
   return container;
+}
+
+// === EDITAR PRODUCTO ===
+export function editProducto(producto, onSave) {
+  const modal = document.createElement("div");
+  modal.className = "modal fade show";
+  modal.style.display = "block";
+  modal.style.backgroundColor = "rgba(0,0,0,0.5)";
+  modal.innerHTML = `
+    <div class="modal-dialog">
+      <div class="modal-content p-3">
+        <div class="modal-header border-0">
+          <h5 class="modal-title text-purple fw-bold">Editar producto</h5>
+          <button class="btn-close" id="closeModal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editForm" autocomplete="off">
+            <div class="mb-3">
+              <label class="form-label">Nombre</label>
+              <input name="nombre" class="form-control" value="${producto.nombre}" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Cantidad</label>
+              <input name="cantidad" type="number" class="form-control" value="${producto.cantidad}" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Precio ($)</label>
+              <input name="precio" type="number" step="0.01" class="form-control" value="${producto.precio}" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Categoría</label>
+              <select name="categoria" class="form-select">
+                ${[
+                  "Papelería",
+                  "Ropa y accesorios",
+                  "Belleza y cuidado personal",
+                  "Herramientas y ferretería",
+                  "Electrónicos y tecnología",
+                  "Hogar y cocina",
+                  "Juguetes y entretenimiento",
+                  "Alimentos y bebidas",
+                  "Automotriz",
+                  "Salud y farmacia",
+                  "Deportes y aire libre",
+                  "Oficina y escuela",
+                  "Otros",
+                ]
+                  .map(
+                    (cat) =>
+                      `<option value="${cat}" ${
+                        cat === producto.categoria ? "selected" : ""
+                      }>${cat}</option>`
+                  )
+                  .join("")}
+              </select>
+            </div>
+            <div class="text-end">
+              <button class="btn btn-purple" type="submit">Guardar cambios</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Cerrar modal
+  modal.querySelector("#closeModal").addEventListener("click", () => modal.remove());
+
+  // Envío
+  modal.querySelector("#editForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const updatedData = {
+      nombre: e.target.nombre.value.trim(),
+      cantidad: Number(e.target.cantidad.value),
+      precio: Number(e.target.precio.value),
+      categoria: e.target.categoria.value,
+      fecha: new Date().toISOString(),
+    };
+
+    onSave(updatedData);
+    modal.remove();
+  });
 }
