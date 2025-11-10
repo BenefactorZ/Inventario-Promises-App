@@ -10,7 +10,7 @@ export function createTable(
   filtersDiv.className = "filters";
 
   filtersDiv.innerHTML = `
-    <input type="text" class="form-control search-input" placeholder="🔍 Buscar por ID o nombre...">
+    <input type="text" class="form-control search-input" placeholder="🔍 Buscar por nombre...">
     <select class="form-select filter-select" id="yearFilter"></select>
     <select class="form-select filter-select" id="monthFilter">
       <option value="">Mes</option>
@@ -59,13 +59,10 @@ export function createTable(
 
   const renderRows = (data) => {
     if (data.length === 0)
-      return `<tr><td colspan="7" class="text-center text-muted">Sin resultados</td></tr>`;
+      return `<tr><td colspan="6" class="text-center text-muted">Sin resultados</td></tr>`;
 
     return data
       .map((item) => {
-        // ✅ ID limpio (sin $oid)
-        const id = String(item._id || "Sin ID");
-
         // ✅ Fecha formateada
         let fecha = "Sin fecha";
         if (item.fecha) {
@@ -81,17 +78,16 @@ export function createTable(
 
         return `
           <tr>
-            <td>${id}</td>
             <td>${item.nombre ?? "Sin nombre"}</td>
             <td>${item.cantidad ?? 0}</td>
             <td>$${Number(item.precio ?? 0).toFixed(2)}</td>
             <td>${item.categoria ?? "Sin categoría"}</td>
             <td>${fecha}</td>
             <td>
-              <button class="btn btn-sm btn-outline-purple edit" data-id="${id}">
+              <button class="btn btn-sm btn-outline-purple edit" data-id="${item._id}">
                 <i class="bi bi-pencil"></i> Editar
               </button>
-              <button class="btn btn-sm btn-outline-danger delete" data-id="${id}">
+              <button class="btn btn-sm btn-outline-danger delete" data-id="${item._id}">
                 <i class="bi bi-trash"></i> Eliminar
               </button>
             </td>
@@ -106,7 +102,6 @@ export function createTable(
   table.innerHTML = `
     <thead>
       <tr>
-        <th>ID</th>
         <th>Nombre</th>
         <th>Cantidad</th>
         <th>Precio ($)</th>
@@ -148,14 +143,11 @@ export function createTable(
     const category = categoryFilter.value;
 
     const filtered = items.filter((i) => {
-      const matchesSearch =
-        i.nombre?.toLowerCase().includes(search) || String(i._id).includes(search);
-
+      const matchesSearch = i.nombre?.toLowerCase().includes(search);
       const d = new Date(i.fecha);
       const matchesYear = !year || d.getFullYear().toString() === year;
       const matchesMonth = !month || d.getMonth() + 1 === Number(month);
       const matchesCategory = !category || i.categoria === category;
-
       return matchesSearch && matchesYear && matchesMonth && matchesCategory;
     });
 
@@ -166,21 +158,13 @@ export function createTable(
     el.addEventListener("input", applyFilters)
   );
 
-  // ===== EVENTOS DE BOTONES (EDITAR / ELIMINAR) =====
+  // ===== EVENTOS DE BOTONES =====
   table.addEventListener("click", (e) => {
     const editBtn = e.target.closest(".edit");
     const deleteBtn = e.target.closest(".delete");
 
-    if (editBtn) {
-      const id = editBtn.dataset.id;
-      const item = items.find((it) => String(it._id) === id);
-      if (item) onEdit(item);
-    }
-
-    if (deleteBtn) {
-      const id = deleteBtn.dataset.id;
-      onDelete(id);
-    }
+    if (editBtn) onEdit(items.find((it) => String(it._id) === editBtn.dataset.id));
+    if (deleteBtn) onDelete(deleteBtn.dataset.id);
   });
 
   // ===== MODO OSCURO =====
