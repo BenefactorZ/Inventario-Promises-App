@@ -19,16 +19,13 @@ export function renderApp(
     onPrevPage = () => {},
   }
 ) {
-  // Validación del contenedor raíz
   if (!root) {
     console.error("❌ No se encontró el contenedor raíz para renderizar la app.");
     return;
   }
 
-  // Limpia el contenido antes de renderizar
   root.innerHTML = "";
 
-  // Renderiza según el tab activo
   if (currentTab === "form") {
     root.appendChild(createForm(onCreate));
   } else {
@@ -41,7 +38,6 @@ export function renderApp(
       onPrevPage,
     });
 
-    // Si no hay productos, muestra un mensaje informativo
     if (!items || items.length === 0) {
       const emptyMsg = document.createElement("div");
       emptyMsg.className = "alert alert-info mt-3 text-center fw-semibold";
@@ -51,9 +47,6 @@ export function renderApp(
 
     root.appendChild(tableSection);
   }
-
-  // Actualiza el texto del modo (claro/oscuro)
-  updateThemeLabel();
 }
 
 /**
@@ -71,7 +64,7 @@ export function renderLoading(root) {
 }
 
 /**
- * Muestra un mensaje de error elegante y visible.
+ * Muestra un mensaje de error elegante.
  */
 export function renderError(root, message) {
   if (!root) return;
@@ -80,25 +73,9 @@ export function renderError(root, message) {
   alert.className = "alert alert-danger mt-3 shadow-sm fw-semibold";
   alert.textContent = message;
 
-  // Muestra el error sobre el contenido actual
   root.prepend(alert);
 
-  // Remueve el mensaje después de 3 segundos
   setTimeout(() => {
     if (alert && alert.parentNode) alert.remove();
   }, 3000);
-}
-
-/**
- * Actualiza el texto del interruptor de modo claro/oscuro dinámicamente.
- */
-export function updateThemeLabel() {
-  const themeLabel =
-    document.getElementById("themeLabel") ||
-    document.querySelector(".form-check-label");
-  if (!themeLabel) return;
-
-  const currentTheme = document.documentElement.getAttribute("data-theme");
-  themeLabel.textContent =
-    currentTheme === "dark" ? "Modo Claro" : "Modo Oscuro";
 }

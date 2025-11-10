@@ -9,7 +9,6 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// ====== ✅ CORS CONFIGURADO CORRECTAMENTE ======
 const allowedOrigins = [
   "http://localhost:5173", // entorno local
   "http://localhost:5174", // a veces Vite usa este puerto
@@ -26,7 +25,7 @@ app.use(
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       } else {
-        console.warn("⛔ Bloqueado por CORS:", origin);
+        console.warn("Bloqueado por CORS:", origin);
         return callback(new Error("No permitido por CORS"));
       }
     },
@@ -44,19 +43,19 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => console.log("✅ Conectado a MongoDB Atlas"))
-  .catch((err) => console.error("❌ Error al conectar con MongoDB:", err));
+  .then(() => console.log("Conectado a MongoDB Atlas"))
+  .catch((err) => console.error("Error al conectar con MongoDB:", err));
 
 // ====== Rutas principales ======
 app.use("/api/productos", productosRoutes);
-console.log("✅ Ruta /api/productos registrada correctamente");
+console.log("Ruta /api/productos registrada correctamente");
 
 // ====== Ruta raíz (para prueba rápida) ======
 app.get("/", (req, res) => {
-  res.send("🚀 Servidor backend funcionando correctamente");
+  res.send(" Servidor backend funcionando correctamente");
 });
 
 // ====== Servidor ======
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
+  console.log(` Servidor corriendo en el puerto ${PORT}`);
 });

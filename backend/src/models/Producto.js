@@ -8,7 +8,7 @@ const productoSchema = new mongoose.Schema(
     cantidad: { type: Number, default: 1 },
     fecha: { type: Date, default: Date.now },
   },
-  { timestamps: true } // ✅ agrega createdAt y updatedAt automáticos
+  { timestamps: true } // agrega createdAt y updatedAt automáticos
 );
 
 export default mongoose.model("Producto", productoSchema);
