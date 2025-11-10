@@ -1,9 +1,9 @@
 // === FORMULARIO (Registrar producto) ===
 export function createForm(onSubmit) {
-  const container = document.createElement("div");
-  container.className = "form-container card p-4 bg-dark text-light rounded-3 shadow-sm";
+  const form = document.createElement("form");
+  form.className = "form-container";
 
-  container.innerHTML = `
+ container.innerHTML = `
     <h5 class="mb-3 text-purple fw-bold">Registrar nuevo producto</h5>
     <form id="itemForm" autocomplete="off">
       <div class="row g-3">
@@ -11,10 +11,8 @@ export function createForm(onSubmit) {
         <div class="col-md-3">
           <label class="form-label fw-semibold">Nombre del Producto</label>
           <input 
-            id="nombre"
-            name="nombre" 
+            name="name" 
             class="form-control input-theme" 
-            placeholder="Nombre del producto"
             required 
           />
         </div>
@@ -22,12 +20,10 @@ export function createForm(onSubmit) {
         <div class="col-md-3">
           <label class="form-label fw-semibold">Cantidad</label>
           <input 
-            id="cantidad"
-            name="cantidad" 
+            name="qty" 
             type="number" 
             class="form-control input-theme" 
             min="0" 
-            placeholder="Cantidad"
             required 
           />
         </div>
@@ -35,20 +31,18 @@ export function createForm(onSubmit) {
         <div class="col-md-3">
           <label class="form-label fw-semibold">Precio ($)</label>
           <input 
-            id="precio"
-            name="precio" 
+            name="price" 
             type="number" 
             step="0.01" 
             class="form-control input-theme" 
             min="0" 
-            placeholder="Precio"
             required 
           />
         </div>
 
         <div class="col-md-3">
           <label class="form-label fw-semibold">Categoría</label>
-          <select id="categoria" name="categoria" class="form-select input-theme" required>
+          <select name="category" class="form-select input-theme" required>
             <option value="" selected disabled>Seleccionar categoría</option>
             <option>Papelería</option>
             <option>Ropa y accesorios</option>
@@ -76,23 +70,115 @@ export function createForm(onSubmit) {
     </form>
   `;
 
-  const form = container.querySelector("#itemForm");
-
-  // === Manejar envío (Netlify-compatible) ===
   form.addEventListener("submit", (e) => {
     e.preventDefault();
 
     const data = {
       nombre: form.querySelector("#nombre").value.trim(),
-      cantidad: Number(form.querySelector("#cantidad").value),
-      precio: Number(form.querySelector("#precio").value),
+      cantidad: form.querySelector("#cantidad").value,
+      precio: form.querySelector("#precio").value,
       categoria: form.querySelector("#categoria").value,
-      fecha: new Date().toISOString(),
     };
 
     onSubmit(data);
     form.reset();
   });
 
-  return container;
+  return form;
+}
+
+// === MODAL (Editar producto) ===
+export function editProducto(producto, onSave) {
+  const modal = document.createElement("div");
+  modal.className = "modal fade show";
+  modal.style.display = "block";
+  modal.style.backgroundColor = "rgba(0,0,0,0.5)";
+
+  modal.innerHTML = `
+    <div class="modal-dialog">
+      <div class="modal-content p-3" style="background-color: var(--bs-dark, #1a1a1a); color: #fff; border-radius: 10px;">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold" style="color: #9b5de5;">Editar producto</h5>
+          <button class="btn-close" id="closeModal" style="filter: invert(1);"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editForm" autocomplete="off">
+            <div class="mb-3">
+              <label class="form-label" style="color: #9b5de5;">Nombre</label>
+              <input name="nombre" class="form-control"
+                style="background-color: #2b2b2b; color: #fff; border: 1px solid #9b5de5;"
+                value="${producto.nombre}" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label" style="color: #9b5de5;">Cantidad</label>
+              <input name="cantidad" type="number" class="form-control"
+                style="background-color: #2b2b2b; color: #fff; border: 1px solid #9b5de5;"
+                value="${producto.cantidad}" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label" style="color: #9b5de5;">Precio ($)</label>
+              <input name="precio" type="number" step="0.01" class="form-control"
+                style="background-color: #2b2b2b; color: #fff; border: 1px solid #9b5de5;"
+                value="${producto.precio}" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label" style="color: #9b5de5;">Categoría</label>
+              <select name="categoria" class="form-select"
+                style="background-color: #2b2b2b; color: #fff; border: 1px solid #9b5de5;">
+                ${[
+                  "Papelería",
+                  "Ropa y accesorios",
+                  "Belleza y cuidado personal",
+                  "Herramientas y ferretería",
+                  "Electrónicos y tecnología",
+                  "Hogar y cocina",
+                  "Juguetes y entretenimiento",
+                  "Alimentos y bebidas",
+                  "Automotriz",
+                  "Salud y farmacia",
+                  "Deportes y aire libre",
+                  "Oficina y escuela",
+                  "Otros",
+                ]
+                  .map(
+                    (cat) =>
+                      `<option value="${cat}" ${
+                        cat === producto.categoria ? "selected" : ""
+                      }>${cat}</option>`
+                  )
+                  .join("")}
+              </select>
+            </div>
+            <div class="text-end">
+              <button class="btn" type="submit"
+                style="background-color: #9b5de5; color: white; font-weight: 600; padding: 8px 20px; border-radius: 8px;">
+                Guardar cambios
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // === Cerrar modal ===
+  modal.querySelector("#closeModal").addEventListener("click", () => modal.remove());
+
+  // === Guardar cambios ===
+  modal.querySelector("#editForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const updatedData = {
+      nombre: e.target.nombre.value.trim(),
+      cantidad: Number(e.target.cantidad.value),
+      precio: Number(e.target.precio.value),
+      categoria: e.target.categoria.value,
+      fecha: new Date().toISOString(),
+    };
+
+    onSave(updatedData);
+    modal.remove();
+  });
 }
