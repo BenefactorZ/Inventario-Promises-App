@@ -9,53 +9,36 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-const allowedOrigins = [
-  "http://localhost:5173", // entorno local
-  "http://localhost:5174", // a veces Vite usa este puerto
-  "https://stellular-shortbread-96e37f.netlify.app", // dominio de Netlify
-  "https://inventario-promises-app-1.onrender.com", // tu dominio en Render
-];
-
-// Middleware de CORS
+// ✅ Permitir todos los orígenes temporalmente (debug)
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Permitir peticiones sin origen (como Postman o curl)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      } else {
-        console.warn("Bloqueado por CORS:", origin);
-        return callback(new Error("No permitido por CORS"));
-      }
-    },
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type"],
   })
 );
 
-// ====== Middleware ======
+// ✅ Middleware
 app.use(express.json());
 
-// ====== Conexión a MongoDB ======
+// ✅ Conexión a MongoDB
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => console.log("Conectado a MongoDB Atlas"))
-  .catch((err) => console.error("Error al conectar con MongoDB:", err));
+  .then(() => console.log("✅ Conectado a MongoDB Atlas"))
+  .catch((err) => console.error("❌ Error al conectar con MongoDB:", err));
 
-// ====== Rutas principales ======
+// ✅ Rutas
 app.use("/api/productos", productosRoutes);
-console.log("Ruta /api/productos registrada correctamente");
 
-// ====== Ruta raíz (para prueba rápida) ======
+// ✅ Ruta raíz
 app.get("/", (req, res) => {
-  res.send(" Servidor backend funcionando correctamente");
+  res.send("🚀 Servidor backend funcionando correctamente con CORS abierto");
 });
 
-// ====== Servidor ======
+// ✅ Iniciar servidor
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(` Servidor corriendo en el puerto ${PORT}`);
+  console.log(`✅ Servidor corriendo en el puerto ${PORT}`);
 });
