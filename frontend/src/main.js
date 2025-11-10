@@ -1,79 +1,114 @@
 import { renderApp, renderError, renderLoading } from "./ui.js";
 import { getProductos, createProducto, updateProducto, deleteProducto } from "./api.js";
-import { editProducto } from "./components/modal.js";
+import { editProducto } from "./components/form.js"; // ✅ Importa desde el archivo correcto
 
 let items = [];
 let currentTab = "form";
 const app = document.getElementById("app");
 
+// === Inicialización ===
+document.addEventListener("DOMContentLoaded", init);
+
 async function init() {
-  renderApp(app, { items, onCreate: handleCreate, onDelete: handleDelete, onEdit: handleEdit, currentTab });
+  renderApp(app, {
+    items,
+    onCreate: handleCreate,
+    onDelete: handleDelete,
+    onEdit: handleEdit,
+    currentTab,
+  });
   await loadAndRender();
 }
 
-document.addEventListener("DOMContentLoaded", init);
-
+// === Cargar y renderizar productos ===
 async function loadAndRender() {
   if (currentTab !== "list") return;
+
   renderLoading(app);
   try {
     const data = await getProductos();
     items = data.map((item) => ({
       ...item,
       _id: typeof item._id === "object" ? item._id.$oid || JSON.stringify(item._id) : item._id,
-      fecha: item.createdAt ? new Date(item.createdAt).toLocaleDateString("es-ES") : "Sin fecha",
+      fecha: item.createdAt
+        ? new Date(item.createdAt).toLocaleDateString("es-ES")
+        : "Sin fecha",
     }));
-    renderApp(app, { items, onCreate: handleCreate, onDelete: handleDelete, onEdit: handleEdit, currentTab });
+
+    renderApp(app, {
+      items,
+      onCreate: handleCreate,
+      onDelete: handleDelete,
+      onEdit: handleEdit,
+      currentTab,
+    });
   } catch (err) {
+    console.error(err);
     renderError(app, "No se pudo cargar la lista de productos.");
   }
 }
 
+// === Crear producto ===
 async function handleCreate(data) {
   try {
-    if (!data.name.trim() || isNaN(data.price)) {
-      renderError(app, "Nombre o precio inválidos.");
+    if (!data.nombre.trim() || isNaN(data.precio) || isNaN(data.cantidad)) {
+      renderError(app, "Datos inválidos. Revisa los campos.");
       return;
     }
+
     await createProducto({
-      nombre: data.name.trim(),
-      precio: Number(data.price),
-      categoria: data.category || "General",
+      nombre: data.nombre.trim(),
+      cantidad: Number(data.cantidad),
+      precio: Number(data.precio),
+      categoria: data.categoria || "General",
       fecha: new Date().toISOString(),
     });
+
     currentTab = "list";
     await loadAndRender();
     setActiveTab("productos");
-  } catch {
+  } catch (err) {
+    console.error(err);
     renderError(app, "No se pudo crear el producto.");
   }
 }
 
+// === Eliminar producto ===
 async function handleDelete(id) {
   if (!confirm("¿Deseas eliminar este producto?")) return;
+
   try {
     await deleteProducto(id);
     await loadAndRender();
-  } catch {
+  } catch (err) {
+    console.error(err);
     renderError(app, "No se pudo eliminar el producto.");
   }
 }
 
+// === Editar producto ===
 async function handleEdit(producto) {
   editProducto(producto, async (updatedData) => {
     try {
       await updateProducto(producto._id, updatedData);
-      await loadAndRender(); // Recarga la lista después de guardar
+      await loadAndRender();
     } catch (err) {
+      console.error(err);
       renderError(app, "No se pudo actualizar el producto.");
     }
   });
 }
 
-
+// === Cambiar pestañas ===
 document.getElementById("btnRegistrar").addEventListener("click", () => {
   currentTab = "form";
-  renderApp(app, { items, onCreate: handleCreate, onDelete: handleDelete, onEdit: handleEdit, currentTab });
+  renderApp(app, {
+    items,
+    onCreate: handleCreate,
+    onDelete: handleDelete,
+    onEdit: handleEdit,
+    currentTab,
+  });
   setActiveTab("registrar");
 });
 
@@ -83,9 +118,11 @@ document.getElementById("btnProductos").addEventListener("click", async () => {
   setActiveTab("productos");
 });
 
+// === Actualizar estado de pestaña ===
 function setActiveTab(tab) {
   const btnRegistrar = document.getElementById("btnRegistrar");
   const btnProductos = document.getElementById("btnProductos");
+
   if (tab === "registrar") {
     btnRegistrar.classList.add("active");
     btnProductos.classList.remove("active");
@@ -93,4 +130,4 @@ function setActiveTab(tab) {
     btnProductos.classList.add("active");
     btnRegistrar.classList.remove("active");
   }
-}  
+}

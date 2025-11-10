@@ -2,22 +2,34 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
-import productosRoutes from "./routes/productos.js"; // ✅ ruta correcta
+import productosRoutes from "./routes/productos.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// ====== ✅ CORS CONFIGURADO ======
+// ====== ✅ CORS CONFIGURADO CORRECTAMENTE ======
 const allowedOrigins = [
-  "http://localhost:5173", // tu entorno local
+  "http://localhost:5173", // entorno local
+  "http://localhost:5174", // a veces Vite usa este puerto
   "https://stellular-shortbread-96e37f.netlify.app", // dominio de Netlify
+  "https://inventario-promises-app-1.onrender.com", // tu dominio en Render
 ];
 
+// Middleware de CORS
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      // Permitir peticiones sin origen (como Postman o curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        console.warn("⛔ Bloqueado por CORS:", origin);
+        return callback(new Error("No permitido por CORS"));
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type"],
   })
