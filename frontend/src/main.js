@@ -3,6 +3,7 @@ import { getProductos, createProducto, updateProducto, deleteProducto } from "./
 
 let items = [];
 let currentTab = "form";
+let editingItem = null; // ✅ Guarda el producto que se está editando
 const app = document.getElementById("app");
 
 // =====================
@@ -11,10 +12,11 @@ const app = document.getElementById("app");
 async function init() {
   renderApp(app, {
     items,
-    onCreate: handleCreate,
+    onCreate: handleCreateOrUpdate,
     onDelete: handleDelete,
     onEdit: handleEdit,
     currentTab,
+    editingItem,
   });
   await loadAndRender();
 }
@@ -49,10 +51,11 @@ async function loadAndRender() {
 
     renderApp(app, {
       items,
-      onCreate: handleCreate,
+      onCreate: handleCreateOrUpdate,
       onDelete: handleDelete,
       onEdit: handleEdit,
       currentTab,
+      editingItem,
     });
   } catch (err) {
     console.error(err);
@@ -61,11 +64,10 @@ async function loadAndRender() {
 }
 
 // =====================
-// Crear producto
+// Crear o Actualizar producto
 // =====================
-async function handleCreate(data) {
+async function handleCreateOrUpdate(data) {
   try {
-    // ✅ Asegurar nombres correctos
     const producto = {
       nombre: data.nombre?.trim(),
       precio: Number(data.precio),
@@ -79,13 +81,21 @@ async function handleCreate(data) {
       return;
     }
 
-    await createProducto(producto);
+    if (editingItem) {
+      // ✅ Si hay un producto en edición, lo actualiza
+      await updateProducto(editingItem._id, producto);
+      editingItem = null;
+    } else {
+      // ✅ Si no hay producto en edición, crea uno nuevo
+      await createProducto(producto);
+    }
+
     currentTab = "list";
     await loadAndRender();
     setActiveTab("productos");
   } catch (err) {
     console.error(err);
-    renderError(app, "❌ No se pudo crear el producto.");
+    renderError(app, "❌ No se pudo guardar el producto.");
   }
 }
 
@@ -107,31 +117,21 @@ async function handleDelete(id) {
 // Editar producto
 // =====================
 async function handleEdit(item) {
-  const newName = prompt("Nuevo nombre:", item.nombre);
-  if (newName === null) return;
+  // ✅ Cambiar a pestaña de formulario
+  currentTab = "form";
+  editingItem = item;
 
-  const newCantidad = Number(prompt("Nueva cantidad:", item.cantidad));
-  if (isNaN(newCantidad)) return renderError(app, "Cantidad inválida.");
+  // ✅ Renderiza el formulario con los valores cargados
+  renderApp(app, {
+    items,
+    onCreate: handleCreateOrUpdate,
+    onDelete: handleDelete,
+    onEdit: handleEdit,
+    currentTab,
+    editingItem,
+  });
 
-  const newPrice = Number(prompt("Nuevo precio:", item.precio));
-  if (isNaN(newPrice)) return renderError(app, "Precio inválido.");
-
-  const newCategory = prompt("Nueva categoría:", item.categoria);
-
-  const actualizado = {
-    nombre: newName.trim(),
-    cantidad: newCantidad,
-    precio: newPrice,
-    categoria: newCategory || "General",
-  };
-
-  try {
-    await updateProducto(item._id, actualizado);
-    await loadAndRender();
-  } catch (err) {
-    console.error(err);
-    renderError(app, "❌ No se pudo actualizar el producto.");
-  }
+  setActiveTab("registrar");
 }
 
 // =====================
@@ -139,18 +139,21 @@ async function handleEdit(item) {
 // =====================
 document.getElementById("btnRegistrar").addEventListener("click", () => {
   currentTab = "form";
+  editingItem = null; // ✅ Limpia el modo edición
   renderApp(app, {
     items,
-    onCreate: handleCreate,
+    onCreate: handleCreateOrUpdate,
     onDelete: handleDelete,
     onEdit: handleEdit,
     currentTab,
+    editingItem,
   });
   setActiveTab("registrar");
 });
 
 document.getElementById("btnProductos").addEventListener("click", async () => {
   currentTab = "list";
+  editingItem = null;
   await loadAndRender();
   setActiveTab("productos");
 });

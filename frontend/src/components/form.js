@@ -1,10 +1,19 @@
-// === CREAR PRODUCTO ===
-export function createForm(onSubmit) {
+// === CREAR / EDITAR PRODUCTO ===
+export function createForm(onSubmit, editingItem = null) {
   const container = document.createElement("div");
   container.className = "card card-body shadow-sm";
 
+  // Título dinámico
+  const titulo = editingItem
+    ? "Editar producto"
+    : "Registrar nuevo producto";
+
+  const textoBoton = editingItem
+    ? "Guardar cambios"
+    : "Registrar producto";
+
   container.innerHTML = `
-    <h5 class="mb-3 text-purple fw-bold">Registrar nuevo producto</h5>
+    <h5 class="mb-3 text-purple fw-bold">${titulo}</h5>
     <form id="itemForm" autocomplete="off">
       <div class="row g-3">
 
@@ -43,7 +52,7 @@ export function createForm(onSubmit) {
         <div class="col-md-3">
           <label class="form-label fw-semibold">Categoría</label>
           <select name="categoria" class="form-select input-theme" required>
-            <option value="" selected disabled>Seleccionar categoría</option>
+            <option value="" disabled>Seleccionar categoría</option>
             <option>Papelería</option>
             <option>Ropa y accesorios</option>
             <option>Belleza y cuidado personal</option>
@@ -64,7 +73,7 @@ export function createForm(onSubmit) {
 
       <div class="d-flex justify-content-end mt-4">
         <button class="btn btn-purple px-4 fw-semibold" type="submit">
-          Registrar producto
+          ${textoBoton}
         </button>
       </div>
     </form>
@@ -72,9 +81,20 @@ export function createForm(onSubmit) {
 
   const form = container.querySelector("#itemForm");
 
+  // ✅ Si estamos editando, rellenar los campos
+  if (editingItem) {
+    form.nombre.value = editingItem.nombre;
+    form.cantidad.value = editingItem.cantidad;
+    form.precio.value = editingItem.precio;
+    form.categoria.value = editingItem.categoria;
+  } else {
+    form.categoria.value = ""; // Limpia la selección
+  }
+
   // === APLICAR TEMA CLARO/OSCURO ===
   const updateInputTheme = () => {
-    const isLight = document.documentElement.getAttribute("data-theme") === "light";
+    const isLight =
+      document.documentElement.getAttribute("data-theme") === "light";
     form.querySelectorAll(".input-theme").forEach((el) => {
       if (isLight) {
         el.style.backgroundColor = "#ffffff";
@@ -89,7 +109,10 @@ export function createForm(onSubmit) {
   };
   updateInputTheme();
   const observer = new MutationObserver(updateInputTheme);
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
 
   // === ENVÍO DEL FORMULARIO ===
   form.addEventListener("submit", (e) => {
@@ -105,96 +128,17 @@ export function createForm(onSubmit) {
       fecha,
     };
 
-    if (!data.nombre || !data.categoria || isNaN(data.cantidad) || isNaN(data.precio)) return;
+    if (
+      !data.nombre ||
+      !data.categoria ||
+      isNaN(data.cantidad) ||
+      isNaN(data.precio)
+    )
+      return;
 
     onSubmit(data);
     form.reset();
   });
 
   return container;
-}
-
-// === EDITAR PRODUCTO ===
-export function editProducto(producto, onSave) {
-  const modal = document.createElement("div");
-  modal.className = "modal fade show";
-  modal.style.display = "block";
-  modal.style.backgroundColor = "rgba(0,0,0,0.5)";
-  modal.innerHTML = `
-    <div class="modal-dialog">
-      <div class="modal-content p-3">
-        <div class="modal-header border-0">
-          <h5 class="modal-title text-purple fw-bold">Editar producto</h5>
-          <button class="btn-close" id="closeModal"></button>
-        </div>
-        <div class="modal-body">
-          <form id="editForm" autocomplete="off">
-            <div class="mb-3">
-              <label class="form-label">Nombre</label>
-              <input name="nombre" class="form-control" value="${producto.nombre}" required />
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Cantidad</label>
-              <input name="cantidad" type="number" class="form-control" value="${producto.cantidad}" required />
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Precio ($)</label>
-              <input name="precio" type="number" step="0.01" class="form-control" value="${producto.precio}" required />
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Categoría</label>
-              <select name="categoria" class="form-select">
-                ${[
-                  "Papelería",
-                  "Ropa y accesorios",
-                  "Belleza y cuidado personal",
-                  "Herramientas y ferretería",
-                  "Electrónicos y tecnología",
-                  "Hogar y cocina",
-                  "Juguetes y entretenimiento",
-                  "Alimentos y bebidas",
-                  "Automotriz",
-                  "Salud y farmacia",
-                  "Deportes y aire libre",
-                  "Oficina y escuela",
-                  "Otros",
-                ]
-                  .map(
-                    (cat) =>
-                      `<option value="${cat}" ${
-                        cat === producto.categoria ? "selected" : ""
-                      }>${cat}</option>`
-                  )
-                  .join("")}
-              </select>
-            </div>
-            <div class="text-end">
-              <button class="btn btn-purple" type="submit">Guardar cambios</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  // Cerrar modal
-  modal.querySelector("#closeModal").addEventListener("click", () => modal.remove());
-
-  // Envío
-  modal.querySelector("#editForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const updatedData = {
-      nombre: e.target.nombre.value.trim(),
-      cantidad: Number(e.target.cantidad.value),
-      precio: Number(e.target.precio.value),
-      categoria: e.target.categoria.value,
-      fecha: new Date().toISOString(),
-    };
-
-    onSave(updatedData);
-    modal.remove();
-  });
 }
