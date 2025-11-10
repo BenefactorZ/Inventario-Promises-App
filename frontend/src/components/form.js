@@ -11,9 +11,10 @@ export function createForm(onSubmit) {
     <div class="row g-3">
 
       <div class="col-md-3">
-        <label class="form-label fw-semibold" style="color:#fff;">Nombre del producto</label>
+        <label for="nombre" class="form-label fw-semibold" style="color:#fff;">Nombre del producto</label>
         <input 
           id="nombre"
+          name="nombre"
           type="text"
           class="form-control"
           placeholder="Nombre del producto"
@@ -23,9 +24,10 @@ export function createForm(onSubmit) {
       </div>
 
       <div class="col-md-3">
-        <label class="form-label fw-semibold" style="color:#fff;">Cantidad</label>
+        <label for="cantidad" class="form-label fw-semibold" style="color:#fff;">Cantidad</label>
         <input 
           id="cantidad"
+          name="cantidad"
           type="number"
           min="0"
           class="form-control"
@@ -36,9 +38,10 @@ export function createForm(onSubmit) {
       </div>
 
       <div class="col-md-3">
-        <label class="form-label fw-semibold" style="color:#fff;">Precio ($)</label>
+        <label for="precio" class="form-label fw-semibold" style="color:#fff;">Precio ($)</label>
         <input 
           id="precio"
+          name="precio"
           type="number"
           step="0.01"
           min="0"
@@ -50,9 +53,10 @@ export function createForm(onSubmit) {
       </div>
 
       <div class="col-md-3">
-        <label class="form-label fw-semibold" style="color:#fff;">Categoría</label>
+        <label for="categoria" class="form-label fw-semibold" style="color:#fff;">Categoría</label>
         <select 
           id="categoria"
+          name="categoria"
           class="form-select"
           style="background-color:#2b2b2b; color:#fff; border:1px solid #9b5de5; border-radius:6px;"
           required
@@ -87,9 +91,11 @@ export function createForm(onSubmit) {
     </div>
   `;
 
+  // === Evento Submit ===
   form.addEventListener("submit", (e) => {
     e.preventDefault();
 
+    // Se capturan los datos usando los IDs correctos
     const data = {
       nombre: form.querySelector("#nombre").value.trim(),
       cantidad: Number(form.querySelector("#cantidad").value),
@@ -97,6 +103,7 @@ export function createForm(onSubmit) {
       categoria: form.querySelector("#categoria").value,
     };
 
+    // Enviar datos al callback (que llama al API)
     onSubmit(data);
     form.reset();
   });
