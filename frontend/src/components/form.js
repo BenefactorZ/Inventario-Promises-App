@@ -3,42 +3,72 @@ export function createForm(onSubmit) {
   const form = document.createElement("form");
   form.className = "form-container";
 
- form.innerHTML = `
-  <h2 class="fw-bold mb-4" style="color:#9b5de5;">Registrar producto</h2>
-  <div class="form-group" style="display:flex; flex-wrap:wrap; gap:1rem; align-items:end; background-color:#1a1a1a; padding:1.5rem; border:1px solid #9b5de5; border-radius:12px;">
-    
-    <div style="flex:1; min-width:200px;">
-      <label for="nombre" class="form-label fw-semibold" style="color:#fff;">Nombre</label>
-      <input id="nombre" type="text" placeholder="Nombre del producto" required
-        style="width:100%; background-color:#2b2b2b; color:#fff; border:1px solid #9b5de5; border-radius:6px; padding:0.5rem;" />
-    </div>
+ container.innerHTML = `
+    <h5 class="mb-3 text-purple fw-bold">Registrar nuevo producto</h5>
+    <form id="itemForm" autocomplete="off">
+      <div class="row g-3">
 
-    <div style="flex:1; min-width:150px;">
-      <label for="cantidad" class="form-label fw-semibold" style="color:#fff;">Cantidad</label>
-      <input id="cantidad" type="number" placeholder="Cantidad" required
-        style="width:100%; background-color:#2b2b2b; color:#fff; border:1px solid #9b5de5; border-radius:6px; padding:0.5rem;" />
-    </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Nombre del Producto</label>
+          <input 
+            name="name" 
+            class="form-control input-theme" 
+            required 
+          />
+        </div>
 
-    <div style="flex:1; min-width:150px;">
-      <label for="precio" class="form-label fw-semibold" style="color:#fff;">Precio ($)</label>
-      <input id="precio" type="number" step="0.01" placeholder="Precio" required
-        style="width:100%; background-color:#2b2b2b; color:#fff; border:1px solid #9b5de5; border-radius:6px; padding:0.5rem;" />
-    </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Cantidad</label>
+          <input 
+            name="qty" 
+            type="number" 
+            class="form-control input-theme" 
+            min="0" 
+            required 
+          />
+        </div>
 
-    <div style="flex:1; min-width:200px;">
-      <label for="categoria" class="form-label fw-semibold" style="color:#fff;">Categoría</label>
-      <input id="categoria" type="text" placeholder="Categoría"
-        style="width:100%; background-color:#2b2b2b; color:#fff; border:1px solid #9b5de5; border-radius:6px; padding:0.5rem;" />
-    </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Precio ($)</label>
+          <input 
+            name="price" 
+            type="number" 
+            step="0.01" 
+            class="form-control input-theme" 
+            min="0" 
+            required 
+          />
+        </div>
 
-    <div style="flex:0 0 auto;">
-      <button type="submit" class="btn-registrar"
-        style="background-color:#9b5de5; color:#fff; font-weight:600; border:none; border-radius:8px; padding:0.6rem 1.5rem; transition:0.3s;">
-        Registrar
-      </button>
-    </div>
-  </div>
-`;
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Categoría</label>
+          <select name="category" class="form-select input-theme" required>
+            <option value="" selected disabled>Seleccionar categoría</option>
+            <option>Papelería</option>
+            <option>Ropa y accesorios</option>
+            <option>Belleza y cuidado personal</option>
+            <option>Herramientas y ferretería</option>
+            <option>Electrónicos y tecnología</option>
+            <option>Hogar y cocina</option>
+            <option>Juguetes y entretenimiento</option>
+            <option>Alimentos y bebidas</option>
+            <option>Automotriz</option>
+            <option>Salud y farmacia</option>
+            <option>Deportes y aire libre</option>
+            <option>Oficina y escuela</option>
+            <option>Otros</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="d-flex justify-content-end mt-4">
+        <button class="btn btn-purple px-4 fw-semibold" type="submit">
+          Registrar producto
+        </button>
+      </div>
+    </form>
+  `;
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
