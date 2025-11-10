@@ -3,24 +3,42 @@ export function createForm(onSubmit) {
   const form = document.createElement("form");
   form.className = "form-container";
 
-  form.innerHTML = `
-    <h2>Registrar producto</h2>
-    <div class="form-group">
-      <label for="nombre">Nombre</label>
-      <input id="nombre" type="text" placeholder="Nombre del producto" required />
-      
-      <label for="cantidad">Cantidad</label>
-      <input id="cantidad" type="number" placeholder="Cantidad" required />
-      
-      <label for="precio">Precio ($)</label>
-      <input id="precio" type="number" step="0.01" placeholder="Precio" required />
-      
-      <label for="categoria">Categoría</label>
-      <input id="categoria" type="text" placeholder="Categoría" />
-      
-      <button type="submit" class="btn-registrar">Registrar</button>
+ form.innerHTML = `
+  <h2 class="fw-bold mb-4" style="color:#9b5de5;">Registrar producto</h2>
+  <div class="form-group" style="display:flex; flex-wrap:wrap; gap:1rem; align-items:end; background-color:#1a1a1a; padding:1.5rem; border:1px solid #9b5de5; border-radius:12px;">
+    
+    <div style="flex:1; min-width:200px;">
+      <label for="nombre" class="form-label fw-semibold" style="color:#fff;">Nombre</label>
+      <input id="nombre" type="text" placeholder="Nombre del producto" required
+        style="width:100%; background-color:#2b2b2b; color:#fff; border:1px solid #9b5de5; border-radius:6px; padding:0.5rem;" />
     </div>
-  `;
+
+    <div style="flex:1; min-width:150px;">
+      <label for="cantidad" class="form-label fw-semibold" style="color:#fff;">Cantidad</label>
+      <input id="cantidad" type="number" placeholder="Cantidad" required
+        style="width:100%; background-color:#2b2b2b; color:#fff; border:1px solid #9b5de5; border-radius:6px; padding:0.5rem;" />
+    </div>
+
+    <div style="flex:1; min-width:150px;">
+      <label for="precio" class="form-label fw-semibold" style="color:#fff;">Precio ($)</label>
+      <input id="precio" type="number" step="0.01" placeholder="Precio" required
+        style="width:100%; background-color:#2b2b2b; color:#fff; border:1px solid #9b5de5; border-radius:6px; padding:0.5rem;" />
+    </div>
+
+    <div style="flex:1; min-width:200px;">
+      <label for="categoria" class="form-label fw-semibold" style="color:#fff;">Categoría</label>
+      <input id="categoria" type="text" placeholder="Categoría"
+        style="width:100%; background-color:#2b2b2b; color:#fff; border:1px solid #9b5de5; border-radius:6px; padding:0.5rem;" />
+    </div>
+
+    <div style="flex:0 0 auto;">
+      <button type="submit" class="btn-registrar"
+        style="background-color:#9b5de5; color:#fff; font-weight:600; border:none; border-radius:8px; padding:0.6rem 1.5rem; transition:0.3s;">
+        Registrar
+      </button>
+    </div>
+  </div>
+`;
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
