@@ -1,100 +1,107 @@
-// === CREAR / EDITAR PRODUCTO ===
-export function createForm(onSubmit, editingItem = null) {
-  const container = document.createElement("div");
-  container.className = "card card-body shadow-sm";
-
-  // Título dinámico
-  const titulo = editingItem
-    ? "Editar producto"
-    : "Registrar nuevo producto";
-
-  const textoBoton = editingItem
-    ? "Guardar cambios"
-    : "Registrar producto";
-
-  container.innerHTML = `
-    <h5 class="mb-3 text-purple fw-bold">${titulo}</h5>
-    <form id="itemForm" autocomplete="off">
-      <div class="row g-3">
-
-        <div class="col-md-3">
-          <label class="form-label fw-semibold">Nombre del Producto</label>
-          <input 
-            name="nombre" 
-            class="form-control input-theme" 
-            required 
-          />
+// === EDITAR PRODUCTO ===
+export function editProducto(producto, onSave) {
+  const modal = document.createElement("div");
+  modal.className = "modal fade show";
+  modal.style.display = "block";
+  modal.style.backgroundColor = "rgba(0,0,0,0.5)";
+  
+  // Plantilla del modal
+  modal.innerHTML = `
+    <div class="modal-dialog">
+      <div class="modal-content p-3 shadow-sm">
+        <div class="modal-header border-0">
+          <h5 class="modal-title text-purple fw-bold">Editar producto</h5>
+          <button class="btn-close" id="closeModal"></button>
         </div>
+        <div class="modal-body">
+          <form id="editForm" autocomplete="off">
+            <div class="row g-3">
 
-        <div class="col-md-3">
-          <label class="form-label fw-semibold">Cantidad</label>
-          <input 
-            name="cantidad" 
-            type="number" 
-            class="form-control input-theme" 
-            min="0" 
-            required 
-          />
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Nombre</label>
+                <input 
+                  name="nombre" 
+                  class="form-control input-theme" 
+                  value="${producto.nombre}" 
+                  required 
+                />
+              </div>
+
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Cantidad</label>
+                <input 
+                  name="cantidad" 
+                  type="number" 
+                  class="form-control input-theme" 
+                  value="${producto.cantidad}" 
+                  min="0"
+                  required 
+                />
+              </div>
+
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Precio ($)</label>
+                <input 
+                  name="precio" 
+                  type="number" 
+                  step="0.01" 
+                  class="form-control input-theme" 
+                  value="${producto.precio}" 
+                  min="0"
+                  required 
+                />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Categoría</label>
+                <select name="categoria" class="form-select input-theme" required>
+                  ${[
+                    "Papelería",
+                    "Ropa y accesorios",
+                    "Belleza y cuidado personal",
+                    "Herramientas y ferretería",
+                    "Electrónicos y tecnología",
+                    "Hogar y cocina",
+                    "Juguetes y entretenimiento",
+                    "Alimentos y bebidas",
+                    "Automotriz",
+                    "Salud y farmacia",
+                    "Deportes y aire libre",
+                    "Oficina y escuela",
+                    "Otros",
+                  ]
+                    .map(
+                      (cat) =>
+                        `<option value="${cat}" ${
+                          cat === producto.categoria ? "selected" : ""
+                        }>${cat}</option>`
+                    )
+                    .join("")}
+                </select>
+              </div>
+
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
+              <button class="btn btn-purple px-4 fw-semibold" type="submit">
+                Guardar cambios
+              </button>
+            </div>
+          </form>
         </div>
-
-        <div class="col-md-3">
-          <label class="form-label fw-semibold">Precio ($)</label>
-          <input 
-            name="precio" 
-            type="number" 
-            step="0.01" 
-            class="form-control input-theme" 
-            min="0" 
-            required 
-          />
-        </div>
-
-        <div class="col-md-3">
-          <label class="form-label fw-semibold">Categoría</label>
-          <select name="categoria" class="form-select input-theme" required>
-            <option value="" disabled>Seleccionar categoría</option>
-            <option>Papelería</option>
-            <option>Ropa y accesorios</option>
-            <option>Belleza y cuidado personal</option>
-            <option>Herramientas y ferretería</option>
-            <option>Electrónicos y tecnología</option>
-            <option>Hogar y cocina</option>
-            <option>Juguetes y entretenimiento</option>
-            <option>Alimentos y bebidas</option>
-            <option>Automotriz</option>
-            <option>Salud y farmacia</option>
-            <option>Deportes y aire libre</option>
-            <option>Oficina y escuela</option>
-            <option>Otros</option>
-          </select>
-        </div>
-
       </div>
-
-      <div class="d-flex justify-content-end mt-4">
-        <button class="btn btn-purple px-4 fw-semibold" type="submit">
-          ${textoBoton}
-        </button>
-      </div>
-    </form>
+    </div>
   `;
 
-  const form = container.querySelector("#itemForm");
+  document.body.appendChild(modal);
 
-  // ✅ Si estamos editando, rellenar los campos
-  if (editingItem) {
-    form.nombre.value = editingItem.nombre;
-    form.cantidad.value = editingItem.cantidad;
-    form.precio.value = editingItem.precio;
-    form.categoria.value = editingItem.categoria;
-  } else {
-    form.categoria.value = ""; // Limpia la selección
-  }
+  // === Cerrar modal ===
+  modal.querySelector("#closeModal").addEventListener("click", () => modal.remove());
 
-  // === APLICAR TEMA CLARO/OSCURO ===
+  // === Aplicar tema claro/oscuro igual que en createForm ===
+  const form = modal.querySelector("#editForm");
   const updateInputTheme = () => {
-    const isLight =
-      document.documentElement.getAttribute("data-theme") === "light";
+    const isLight = document.documentElement.getAttribute("data-theme") === "light";
     form.querySelectorAll(".input-theme").forEach((el) => {
       if (isLight) {
         el.style.backgroundColor = "#ffffff";
@@ -109,36 +116,27 @@ export function createForm(onSubmit, editingItem = null) {
   };
   updateInputTheme();
   const observer = new MutationObserver(updateInputTheme);
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ["data-theme"],
-  });
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-  // === ENVÍO DEL FORMULARIO ===
+  // === Envío del formulario ===
   form.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const fecha = new Date().toISOString();
+    const nombre = e.target.nombre.value.trim();
+    const cantidad = Number(e.target.cantidad.value);
+    const precio = Number(e.target.precio.value);
+    const categoria = e.target.categoria.value;
 
-    const data = {
-      nombre: form.nombre.value.trim(),
-      cantidad: Number(form.cantidad.value),
-      precio: Number(form.precio.value),
-      categoria: form.categoria.value.trim(),
-      fecha,
+    const updatedData = {
+      nombre,
+      cantidad,
+      precio,
+      // Si el usuario no cambia la categoría, se mantiene la anterior
+      categoria: categoria || producto.categoria,
+      fecha: new Date().toISOString(),
     };
 
-    if (
-      !data.nombre ||
-      !data.categoria ||
-      isNaN(data.cantidad) ||
-      isNaN(data.precio)
-    )
-      return;
-
-    onSubmit(data);
-    form.reset();
+    onSave(updatedData);
+    modal.remove();
   });
-
-  return container;
 }
