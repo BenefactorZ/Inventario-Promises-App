@@ -221,48 +221,4 @@ label {
   color: var(--text);
   transition: color 0.3s ease;
 }
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 999;
-}
-
-.modal-content {
-  background: #1a1a1a;
-  color: #d0b3ff;
-  padding: 2rem;
-  border-radius: 1rem;
-  width: 400px;
-}
-
-.modal-buttons {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 1rem;
-}
-
-.btn-guardar {
-  background: #9b5de5;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.btn-cancelar {
-  background: #444;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.btn-guardar:hover {
-  background: #7a3ed6;
-}
 
