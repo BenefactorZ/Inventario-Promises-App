@@ -9,7 +9,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// ✅ Permitir todos los orígenes temporalmente (debug)
+//  Permitir todos los orígenes temporalmente (debug)
 app.use(
   cors({
     origin: "*",
@@ -18,27 +18,25 @@ app.use(
   })
 );
 
-// ✅ Middleware
+//  Middleware
 app.use(express.json());
 
-// ✅ Conexión a MongoDB
+// Conexión a MongoDB
 mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("✅ Conectado a MongoDB Atlas"))
-  .catch((err) => console.error("❌ Error al conectar con MongoDB:", err));
+ mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log(" Conectado a MongoDB Atlas"))
+  .catch((err) => console.error(" Error al conectar con MongoDB:", err));
 
-// ✅ Rutas
+
+//  Rutas
 app.use("/api/productos", productosRoutes);
 
-// ✅ Ruta raíz
+// Ruta raíz
 app.get("/", (req, res) => {
-  res.send("🚀 Servidor backend funcionando correctamente con CORS abierto");
+  res.send(" Servidor backend funcionando correctamente con CORS abierto");
 });
 
-// ✅ Iniciar servidor
+//  Iniciar servidor
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`✅ Servidor corriendo en el puerto ${PORT}`);
+  console.log(` Servidor corriendo en el puerto ${PORT}`);
 });

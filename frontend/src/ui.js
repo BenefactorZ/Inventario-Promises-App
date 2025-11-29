@@ -20,7 +20,7 @@ export function renderApp(
   }
 ) {
   if (!root) {
-    console.error("❌ No se encontró el contenedor raíz para renderizar la app.");
+    console.error(" No se encontró el contenedor raíz para renderizar la app.");
     return;
   }
 

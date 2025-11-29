@@ -63,7 +63,7 @@ export function createTable(
 
     return data
       .map((item) => {
-        // ✅ Fecha formateada
+        // Fecha formateada
         let fecha = "Sin fecha";
         if (item.fecha) {
           const d = new Date(item.fecha);

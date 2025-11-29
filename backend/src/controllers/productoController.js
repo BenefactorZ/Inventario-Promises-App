@@ -5,50 +5,50 @@ export const getProductos = async (req, res) => {
   try {
     const productos = await Producto.find().sort({ createdAt: -1 });
 
-    const productosLimpios = productos.map((p) => ({
-      ...p.toObject(),
+    const productosLimpios = productos.map(p => ({
       _id: p._id.toString(),
-      fecha: p.fecha
-        ? new Date(p.fecha).toISOString().split("T")[0] // YYYY-MM-DD
-        : "Sin fecha",
+      nombre: p.nombre,
+      precio: p.precio,
+      cantidad: p.cantidad,
+      categoria: p.categoria,
+      fecha: p.fecha?.toISOString(),        
+      createdAt: p.createdAt?.toISOString(),
     }));
 
     res.json(productosLimpios);
   } catch (err) {
-    console.error("❌ Error al obtener productos:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Error al obtener productos" });
   }
 };
 
 
+
+
 export const crearProducto = async (req, res) => {
   try {
-    const { nombre, precio, categoria, cantidad, fecha } = req.body;
+    const data = req.body;
 
-    if (!nombre || !precio)
-      return res.status(400).json({ error: "Nombre y precio son requeridos" });
+    if (!data.fecha || data.fecha.trim() === "") {
+      delete data.fecha;
+    }
 
-    const nuevo = new Producto({
-      nombre,
-      precio,
-      categoria: categoria || "General",
-      cantidad: cantidad || 1,
-      fecha: fecha || new Date(),
-    });
-
+    const nuevo = new Producto(data);
     const guardado = await nuevo.save();
 
     res.status(201).json({
       ...guardado.toObject(),
       _id: guardado._id.toString(),
+      fecha: guardado.fecha?.toISOString(),
       createdAt: guardado.createdAt?.toISOString(),
       updatedAt: guardado.updatedAt?.toISOString(),
     });
   } catch (err) {
-    console.error(" Error en crearProducto:", err);
+    console.error("Error en crearProducto:", err);
     res.status(400).json({ error: "Error al crear el producto" });
   }
 };
+
+
 
 
 export const actualizarProducto = async (req, res) => {
@@ -56,7 +56,7 @@ export const actualizarProducto = async (req, res) => {
     const actualizado = await Producto.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true } // Devuelve el producto ya actualizado
+      { new: true } 
     ).lean();
 
     if (!actualizado)

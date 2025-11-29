@@ -6,9 +6,9 @@ const productoSchema = new mongoose.Schema(
     precio: { type: Number, required: true },
     categoria: { type: String, default: "General" },
     cantidad: { type: Number, default: 1 },
-    fecha: { type: Date, default: Date.now },
+    fecha: { type: Date, default: Date.now }
   },
-  { timestamps: true } // agrega createdAt y updatedAt automáticos
+  { timestamps: true }
 );
 
 export default mongoose.model("Producto", productoSchema);

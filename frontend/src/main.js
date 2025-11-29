@@ -1,6 +1,6 @@
 import { renderApp, renderError, renderLoading } from "./ui.js";
 import { getProductos, createProducto, updateProducto, deleteProducto } from "./api.js";
-import { editProducto } from "./components/form.js"; // ✅ Importa desde el archivo correcto
+import { editProducto } from "./components/form.js"; 
 
 let items = [];
 let currentTab = "form";
