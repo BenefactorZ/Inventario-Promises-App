@@ -1,6 +1,6 @@
 import { renderApp, renderError, renderLoading } from "./ui.js";
 import { getProductos, createProducto, updateProducto, deleteProducto } from "./api.js";
-import { editProducto } from "./components/form.js"; 
+import { editProducto } from "./components/form.js";
 
 let items = [];
 let currentTab = "form";
@@ -17,22 +17,32 @@ async function init() {
     onEdit: handleEdit,
     currentTab,
   });
-  await loadAndRender();
+
+  if (currentTab === "list") {
+    await loadAndRender();
+  }
 }
 
-// === Cargar y renderizar productos ===
+// === Cargar productos y renderizar lista ===
 async function loadAndRender() {
   if (currentTab !== "list") return;
 
   renderLoading(app);
+
   try {
     const data = await getProductos();
+
+    if (!Array.isArray(data)) {
+      throw new Error("La API no devolvió una lista.");
+    }
+
     items = data.map((item) => ({
       ...item,
-      _id: typeof item._id === "object" ? item._id.$oid || JSON.stringify(item._id) : item._id,
-      fecha: item.createdAt
-        ? new Date(item.createdAt).toLocaleDateString("es-ES")
+      _id: typeof item._id === "object" ? item._id.$oid || String(item._id) : item._id,
+      fecha: item.fecha
+        ? new Date(item.fecha).toLocaleDateString("es-ES")
         : "Sin fecha",
+        fecha: item.fecha ?? null
     }));
 
     renderApp(app, {
@@ -43,7 +53,7 @@ async function loadAndRender() {
       currentTab,
     });
   } catch (err) {
-    console.error(err);
+    console.error("Error cargando productos:", err);
     renderError(app, "No se pudo cargar la lista de productos.");
   }
 }
@@ -52,8 +62,7 @@ async function loadAndRender() {
 async function handleCreate(data) {
   try {
     if (!data.nombre.trim() || isNaN(data.precio) || isNaN(data.cantidad)) {
-      renderError(app, "Datos inválidos. Revisa los campos.");
-      return;
+      return renderError(app, "Datos inválidos. Revisa los campos.");
     }
 
     await createProducto({
@@ -61,7 +70,7 @@ async function handleCreate(data) {
       cantidad: Number(data.cantidad),
       precio: Number(data.precio),
       categoria: data.categoria || "General",
-      fecha: new Date().toISOString(),
+      fecha: new Date().toISOString(), // FECHA SOLO AL CREAR
     });
 
     currentTab = "list";
@@ -118,16 +127,11 @@ document.getElementById("btnProductos").addEventListener("click", async () => {
   setActiveTab("productos");
 });
 
-// === Actualizar estado de pestaña ===
+// === Actualizar estado visual de pestañas ===
 function setActiveTab(tab) {
   const btnRegistrar = document.getElementById("btnRegistrar");
   const btnProductos = document.getElementById("btnProductos");
 
-  if (tab === "registrar") {
-    btnRegistrar.classList.add("active");
-    btnProductos.classList.remove("active");
-  } else {
-    btnProductos.classList.add("active");
-    btnRegistrar.classList.remove("active");
-  }
+  btnRegistrar.classList.toggle("active", tab === "registrar");
+  btnProductos.classList.toggle("active", tab === "productos");
 }

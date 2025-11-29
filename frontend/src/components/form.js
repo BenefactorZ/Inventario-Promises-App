@@ -79,7 +79,7 @@ export function createForm(onSubmit) {
 
   const form = container.querySelector("#itemForm");
 
-  // === Manejar envío (Netlify-compatible) ===
+  // === Manejo del envío ===
   form.addEventListener("submit", (e) => {
     e.preventDefault();
 
@@ -88,7 +88,7 @@ export function createForm(onSubmit) {
       cantidad: Number(form.querySelector("#cantidad").value),
       precio: Number(form.querySelector("#precio").value),
       categoria: form.querySelector("#categoria").value,
-      fecha: new Date().toISOString(),
+      fecha: new Date().toISOString(),  // <-- FECHA CORRECTA SOLO AL CREAR
     };
 
     onSubmit(data);
@@ -184,7 +184,7 @@ export function editProducto(producto, onSave) {
       cantidad: Number(e.target.cantidad.value),
       precio: Number(e.target.precio.value),
       categoria: e.target.categoria.value,
-      fecha: new Date().toISOString(),
+      fecha: producto.fecha ? new Date(producto.fecha).toISOString() : new Date().toISOString(),
     };
 
     onSave(updatedData);
